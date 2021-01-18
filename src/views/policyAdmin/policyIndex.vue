@@ -8,6 +8,7 @@
           :model="secForm"
           label-width="110px"
           :inline="true"
+          size="small"
         >
           <el-form-item label="投保单位：">
             <el-input v-model="secForm.holderName" style="widt:260px" />
@@ -17,10 +18,11 @@
             <el-input v-model="secForm.policyNo" style="widt:260px" />
           </el-form-item>
 
-          <el-button
-            type="primary"
-            @click="onSearch"
-          >查询</el-button>
+          <el-button type="primary" @click="onSearch" >查询</el-button>
+          <div style="width:200px;float:right;">
+            <el-button  type="primary" @click=" catalogue"  size="small" >手动录入</el-button>
+            <el-button type="primary" plain @click="bdImport" size="small" >保单导入</el-button>
+          </div>
         </el-form>
       </div>
       <div class="insurBox">
@@ -28,6 +30,7 @@
           v-loading="listLoading"
           :data="insuranceData"
           element-loading-text="Loading"
+          size="small"
           border
           fit
           highlight-current-row
@@ -127,36 +130,11 @@
               >
                 核保
               </el-button> -->
-              <el-button
-                size="mini"
-                type="text"
-                @click="getDetail(row,$index)"
-              >
-                查看详情
-              </el-button>
-              <el-button
-                size="mini"
-                type="text"
-                @click="setPlace(row,$index)"
-              >
-                设置场所
-              </el-button>
-              <el-button
-                v-if="row.payState == 1"
-                size="mini"
-                type="text"
-                @click="entryPolicy(row,$index)"
-              >
-                保单信息录入
-              </el-button>
-              <el-button
-                v-if="row.payState == 0"
-                size="mini"
-                type="text"
-                @click="payment(row,$index)"
-              >
-                确认支付
-              </el-button>
+              <el-button size="mini"type="text" @click="getDetail(row,$index)" > 查看详情</el-button>
+              <el-button size="mini" type="text" @click="setPlace(row,$index)" >设置场所</el-button>
+              <el-button  v-if="row.payState == 1" size="mini"  type="text" @click="entryPolicy(row,$index)"> 保单信息录入</el-button>
+              <el-button v-if="row.payState == 0" size="mini" type="text" @click="payment(row,$index)"> 确认支付</el-button>
+               <el-button size="mini" type="text" @click="getCostdetails(row,$index)"> 费用信息</el-button>
               <!-- <el-button size="mini" type="success"  v-if="row.payState == 0" @click="toPay(row,$index)">
                 确认支付
               </el-button> -->
@@ -165,13 +143,12 @@
           </el-table-column>
         </el-table>
         <div class="block">
-          <el-pagination
-            :current-page.sync="secForm.page"
-            :page-size="secForm.limit"
-            layout="total,prev, pager, next, jumper"
+          <pagination
+            v-show="totalnum>0"
             :total="totalnum"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
+            :page.sync="secForm.page"
+            :limit.sync="secForm.limit"
+            @pagination="getList"
           />
         </div>
       </div>
@@ -369,6 +346,18 @@
         </div>
       </el-dialog>
     </div>
+    <!--录入保单-->
+    <div>
+        <el-dialog
+        width="95%"
+        top="50px"
+        :visible.sync="dialogTableVisible3"
+        title="保单录入"
+        @dragDialog="dialogTableVisible3 = fasle"
+      >
+      <catalogue ref="catalogue" ></catalogue>
+        </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -383,12 +372,16 @@ import {
 import associated from '../part/associated'
 import placeTable from './components/placeTable'
 import policyInfo from '../part/policyInfo'
+import catalogue from './components/catalogueForm'
+import pagination from '@/components/Pagination'
 export default {
   name: 'Hello',
   components: {
     placeTable,
     policyInfo,
-    associated
+    associated,
+    catalogue,
+    pagination
   },
   provide() {
     return {
@@ -407,6 +400,7 @@ export default {
       title2: '核保',
       dioType2: '',
       diowidth2: '',
+      dialogTableVisible3: true,
       underwritingState: '',
       listLoading: true,
       secForm: {
@@ -567,17 +561,13 @@ export default {
         this.$refs['associated'].getList(this.buildingIds)
       })
     },
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
-      this.page = val
+    // 手动录入
+    catalogue() {
 
-      this.getList()
     },
-    handleCurrentChange(val) {
-      console.log(`当前页000: ${val}`)
-      this.page = val
+    //导入保单
+    bdImport() {
 
-      this.getList()
     }
   }
 }

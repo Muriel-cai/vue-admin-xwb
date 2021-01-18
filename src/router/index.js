@@ -133,7 +133,15 @@ export const constantRoutes = [
       meta: {
         title: '保单管理'
       }
-    }]
+    },
+    {
+      path: 'costdetails',
+      name: 'costdetails',
+      component: () => import('@/views/policyAdmin/costdetails'),
+      meta: {
+        title: '保费信息'
+      }
+    }] 
   },
   {
     path: '/equipmentManag',
